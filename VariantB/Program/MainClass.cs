@@ -11,7 +11,7 @@ using VariantC.Program;
 using VariantB.Storage;
 using VariantB.DelegateEventSort;
 using VariantB.DataBase;
-
+using System.Threading;
 
 
 namespace VariantC
@@ -20,6 +20,7 @@ namespace VariantC
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Главный Поток:" + Thread.CurrentThread.ManagedThreadId);
             var AppleProduct = new Product();
             var TableProduct = new Product();
             var MouseProduct = new Product();
@@ -30,19 +31,7 @@ namespace VariantC
 
             ProductStorage productInOrderStorage = new ProductStorage(); // коллекция продуктов
             OrderStorage storageOrder = new OrderStorage(); // коллекция заказов
-            Console.WriteLine("Програма завершилась с ошибкой? 1. Да 2. Нет");
-            int checkSerialize = Int32.Parse(Console.ReadLine());
-            switch (checkSerialize)
-            {
-                case 1:
-                    IsDeserialize(true, storageOrder);// Нужна ли десериализация.  Метод в этом классе ниже.
-                    break;
-                case 2:
-                    IsDeserialize(false, storageOrder);// Нужна ли десериализация.  Метод в этом классе ниже.
-                    break;
-                default:
-                    break;
-            }
+            SerialiseCheck(storageOrder);
             CRUDOp.CreateDataBaseFile("DataBase"); // Создание файла БД.
 
             productInOrderStorage.AddProduct(new ProductInOrder(TableProduct, 3)); // Продукты в коллекцию
@@ -65,36 +54,31 @@ namespace VariantC
 
             storageOrder.AddOrder("0564750381", new Order(10000, 15, new List<ProductInOrder>() {
             productInOrderStorage[6], productInOrderStorage[7]}));// добавить заказ // 4 ЗАКАЗ//
-            CRUDOp.CreateRecord(storageOrder, "DataBase"); // Создать записи.
 
             SetOrder(ref productInOrderStorage, ref storageOrder); // Меню добавления заказов. Метод в этом классе ниже.
-
-            CRUDOp.ReadRecords("DataBase"); //Вывести в консоль.
-            CRUDOp.UpdateRecord("0564750381", storageOrder[1].Item2, "DataBase"); // Изменить запись заказа по телефону.
-            CRUDOp.DeleteRecordByPhone("0994433565", "DataBase"); // Удалить по телефону.
-            CRUDOp.DeleteAllRecords("DataBase"); // Удалить все заказы.
-            CRUDOp.AddRecord("0999999999", storageOrder[1].Item2, "DataBase"); // Добавить заказ.
-            CRUDOp.AddRecord("0999999998", storageOrder[1].Item2, "DataBase");
-            CRUDOp.ReadRecords("DataBase");
-
+            CRUDOperations(storageOrder); // CRUD Операции, в этом классе ниже
 
             storageOrder.Serialize(); // Сериализация коллекции.
 
-            Functions.SearchOrdersWithSumAndCOuntOfProducts(storageOrder, 10000, 2); //Вывести номера заказов, сумма которых не превосходит заданную и количество различных товаров равно заданному.
-            Functions.SearchThisProduction(storageOrder, "TShirt"); // Вывести номера заказов, содержащих заданный товар.
-            Functions.SearchNotContainsProductAndToday(storageOrder, "Apple", 15);//Вывести номера заказов, не содержащих заданный товар и поступивших в течение текущего дня.
-            storageOrder.AddOrder("0556833325", Functions.CreateOrder(storageOrder, 15)); // Создать заказ из товаров заказанных в этот день
+            Thread myThread;
+            myThread = new Thread(delegate () { Functions.SearchOrdersWithSumAndCOuntOfProducts(storageOrder, 10000, 2); });//Вывести номера заказов, сумма которых не превосходит заданную и количество различных товаров равно заданному. 
+            myThread.Start();
+            myThread = new Thread(delegate () { Functions.SearchThisProduction(storageOrder, "TShirt"); });// Вывести номера заказов, содержащих заданный товар.
+            myThread.Start(); 
+            myThread = new Thread(delegate () { Functions.SearchNotContainsProductAndToday(storageOrder, "Apple", 15); });//Вывести номера заказов, не содержащих заданный товар и поступивших в течение текущего дня.
+            myThread.Start(); 
+            myThread = new Thread(delegate () { Functions.CreateOrder(ref storageOrder, 15); });
+            myThread.Start(); 
 
             Console.WriteLine("---------------------------------------------");
             foreach (var item in storageOrder)
                 Console.WriteLine(item);
-
-            Functions.RemoveOrdersThisProductThisAmount(ref storageOrder, "TShirt", 2);//Удалить все заказы, в которых присутствует заданное количество заданного товара.
+            myThread = new Thread(delegate () { Functions.RemoveOrdersThisProductThisAmount(ref storageOrder, "TShirt", 2); }); //Удалить все заказы, в которых присутствует заданное количество заданного товара.
+            myThread.Start(); 
+            Thread.Sleep(2000);
             Console.WriteLine("---------------------------------------------");
             foreach (var item in storageOrder)
                 Console.WriteLine(item);
-            Console.WriteLine($"За все время было выполнено {Order.orderCount} заказов."); //Выводит количество всех заказов
-
             Console.ReadKey();
         }
 
@@ -154,5 +138,60 @@ namespace VariantC
             }
         }
 
+        public static void SerialiseCheck(OrderStorage storageOrder)
+        {
+            Console.WriteLine("Програма завершилась с ошибкой? 1. Да 2. Нет");
+            int checkSerialize = Int32.Parse(Console.ReadLine());
+            switch (checkSerialize)
+            {
+                case 1:
+                    IsDeserialize(true, storageOrder);// Нужна ли десериализация.  Метод в этом классе ниже.
+                    break;
+                case 2:
+                    IsDeserialize(false, storageOrder);// Нужна ли десериализация.  Метод в этом классе ниже.
+                    break;
+                default:
+                    break;
+            }
+        }
+        public static void CRUDOperations(OrderStorage storageOrder) // 
+        {
+            int check = 0;
+            do
+            {
+                Console.WriteLine("Операции над БД:\n" +
+    "1.Создать запись заказов в БД.\n" +
+    "2.Добавить один заказ.\n" +
+    "3.Считать все заказы.\n" +
+    "4.Обновить запись заказа по телефону.\n" +
+    "5.Удалить запись по телефону.\n" +
+    "6.Удалить все записи.\n" +
+    "7.Выйти.");
+                check = Int32.Parse(Console.ReadLine());
+                switch (check)
+                {
+                    case 1:
+                        ThreadPool.QueueUserWorkItem(state => CRUDOp.CreateRecord(storageOrder, "DataBase"));
+                        break;
+                    case 2:
+                        ThreadPool.QueueUserWorkItem(state => CRUDOp.AddRecord("0999999999", storageOrder[1].Item2, "DataBase"));
+                        break;
+                    case 3:
+                        ThreadPool.QueueUserWorkItem(state => CRUDOp.ReadRecords("DataBase"));
+                        break;
+                    case 4:
+                        ThreadPool.QueueUserWorkItem(state => CRUDOp.UpdateRecord("0564750381", storageOrder[1].Item2, "DataBase"));
+                        break;
+                    case 5:
+                        ThreadPool.QueueUserWorkItem(state => CRUDOp.DeleteRecordByPhone("0994433565", "DataBase"));
+                        break;
+                    case 6:
+                        ThreadPool.QueueUserWorkItem(state => CRUDOp.DeleteAllRecords("DataBase"));
+                        break;
+                    default:
+                        break;
+                }
+            } while (check != 7);
+        }
     }
 }

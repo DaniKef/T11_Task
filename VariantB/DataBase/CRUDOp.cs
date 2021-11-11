@@ -4,13 +4,17 @@ using System.IO;
 using System.Text;
 using VariantB.Storage;
 using VariantC.TaskClasses;
+using System.Threading;
 
 namespace VariantB.DataBase
 {
     class CRUDOp : DataBase
     {
+        static Mutex mutexObj = new Mutex();
         public static void CreateRecord(OrderStorage order, string fileName) // Создать запись заказа в БД.
         {
+            mutexObj.WaitOne();
+            Console.WriteLine("Thread ID:" + Thread.CurrentThread.ManagedThreadId);
             StringBuilder dataBaseName = new StringBuilder(); // Путь к файлу БД.
             dataBaseName.Append(@"DataBase\");
             dataBaseName.Append(fileName);
@@ -40,9 +44,12 @@ namespace VariantB.DataBase
             {
                 Console.WriteLine(e.Message);
             }
+            mutexObj.ReleaseMutex();
         }
         public static void AddRecord(string phone, Order order, string fileName) // Добавить Запись заказа.
         {
+            mutexObj.WaitOne();
+            Console.WriteLine("Thread ID:" + Thread.CurrentThread.ManagedThreadId);
             StringBuilder dataBaseName = new StringBuilder(); // Путь к файлу БД.
             dataBaseName.Append(@"DataBase\");
             dataBaseName.Append(fileName);
@@ -69,9 +76,12 @@ namespace VariantB.DataBase
             {
                 Console.WriteLine(e.Message);
             }
+            mutexObj.ReleaseMutex();
         }
         public static void ReadRecords(string fileName) // Считать все заказы.
         {
+            mutexObj.WaitOne();
+            Console.WriteLine("Thread ID:" + Thread.CurrentThread.ManagedThreadId);
             StringBuilder dataBaseName = new StringBuilder(); // Путь к файлу БД.
             dataBaseName.Append(@"DataBase\");
             dataBaseName.Append(fileName);
@@ -107,9 +117,12 @@ namespace VariantB.DataBase
             {
                 Console.WriteLine(e.Message);
             }
+            mutexObj.ReleaseMutex();
         }
         public static void UpdateRecord(string phone, Order order, string fileName) // Обновить запись заказа по телефону.
         {
+            mutexObj.WaitOne();
+            Console.WriteLine("Thread ID:" + Thread.CurrentThread.ManagedThreadId);
             StringBuilder dataBaseName = new StringBuilder(); // Путь к файлу БД.
             dataBaseName.Append(@"DataBase\");
             dataBaseName.Append(fileName);
@@ -168,9 +181,12 @@ namespace VariantB.DataBase
             {
                 Console.WriteLine(e.Message);
             }
+            mutexObj.ReleaseMutex();
         }
         public static void DeleteRecordByPhone(string phone, string fileName) // Удалить запись по телефону
         {
+            mutexObj.WaitOne();
+            Console.WriteLine("Thread ID:" + Thread.CurrentThread.ManagedThreadId);
             StringBuilder dataBaseName = new StringBuilder(); // Путь к файлу БД.
             dataBaseName.Append(@"DataBase\");
             dataBaseName.Append(fileName);
@@ -217,9 +233,12 @@ namespace VariantB.DataBase
             {
                 Console.WriteLine(e.Message);
             }
+            mutexObj.ReleaseMutex();
         }
         public static void DeleteAllRecords(string fileName) // Сделать файл пустым.
         {
+            mutexObj.WaitOne();
+            Console.WriteLine("Thread ID:" + Thread.CurrentThread.ManagedThreadId);
             StringBuilder dataBaseName = new StringBuilder(); // Путь к файлу БД.
             dataBaseName.Append(@"DataBase\");
             dataBaseName.Append(fileName);
@@ -232,6 +251,7 @@ namespace VariantB.DataBase
             {
                 Console.WriteLine(e.Message);
             }
+            mutexObj.ReleaseMutex();
         }
     }
 }

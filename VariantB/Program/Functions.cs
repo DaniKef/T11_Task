@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using VariantC.TaskClasses;
 using VariantB.Storage;
+using System.Threading;
 
 namespace VariantC.Program
 {
@@ -14,6 +15,7 @@ namespace VariantC.Program
         {
             lock(_locker)
             {
+                Console.WriteLine("Поток:" + Thread.CurrentThread.ManagedThreadId);
                 OrderStorage.WriteResultOfRequest("", "SearchOrdersWithSumAndCOuntOfProducts"); // Запись обращения
                 var orderNumberQuery = orderList.GetStorage().Where(number => number.Value.CountSumOfProducts() <= sum && number.Value.ProductsInOrder.Count == countProducts).
                     Select(number => number.Value.OrderNumber);
@@ -28,6 +30,7 @@ namespace VariantC.Program
         {
             lock (_locker)
             {
+                Console.WriteLine("Поток:" + Thread.CurrentThread.ManagedThreadId);
                 OrderStorage.WriteResultOfRequest("", "SearchThisProduction");
                 // Сначала с помощью синтаксиса запросов, но они не используются
                 //var orderNumberQuery = from order in orderList.GetStorage() 
@@ -47,6 +50,7 @@ namespace VariantC.Program
         {
             lock (_locker)
             {
+                Console.WriteLine("Поток:" + Thread.CurrentThread.ManagedThreadId);
                 OrderStorage.WriteResultOfRequest("", "SearchNotContainsProductAndToday");
                 // Сначала с помощью синтаксиса запросов, но они не используются
                 //var orderNumberQuery = from order in orderList.GetStorage()
@@ -62,11 +66,12 @@ namespace VariantC.Program
                 }
             }
         }
-        public static Order CreateOrder(OrderStorage orderList, int day) //Сформировать новый заказ, состоящий из товаров, заказанных в текущий день.
+        public static Order CreateOrder(ref OrderStorage orderList, int day) //Сформировать новый заказ, состоящий из товаров, заказанных в текущий день.
         {
             List<ProductInOrder> productsOrderlist = new List<ProductInOrder>(); // для составления товаров список товаров
             lock (_locker)
             {
+                Console.WriteLine("Поток:" + Thread.CurrentThread.ManagedThreadId);
                 OrderStorage.WriteResultOfRequest("", "CreateOrder");
                 // Сначала с помощью синтаксиса запросов, но они не используются
                 //var productsOrder = from order in orderList.GetStorage()
@@ -82,6 +87,7 @@ namespace VariantC.Program
                 }
                 var newOrder = new Order(rand.Next(3000, 4000), DateTime.Now, productsOrderlist);
                 OrderStorage.WriteResultOfRequest(newOrder.ToString(), "");
+                orderList.AddOrder("0556833325", newOrder); // Создать заказ из товаров заказанных в этот день
                 return newOrder;// Возвращается
             }
         }
@@ -89,6 +95,7 @@ namespace VariantC.Program
         {
             lock (_locker)
             {
+                Console.WriteLine("Поток:" + Thread.CurrentThread.ManagedThreadId);
                 OrderStorage.WriteResultOfRequest("", "RemoveOrdersThisProductThisAmount");
                 // Сначала с помощью синтаксиса запросов, но они не используются
                 //var productsOrder = from order in orderList.GetStorage()

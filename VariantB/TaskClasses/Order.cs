@@ -12,27 +12,23 @@ namespace VariantC.TaskClasses
         private int _orderNumber; // Номер заказа.
         private List<ProductInOrder> _productsInOrder = new List<ProductInOrder>(); // Товары в заказе.
         private DateTime _receiptDay; // Дата поступления.
-        public static int orderCount; // Считает все выполненные заказы
         public Order(int orderNumber, int day, List<ProductInOrder> newOrder) // Конструктор.
         {
             OrderNumber = orderNumber; // устанавливает номер
             ProductsInOrder.AddRange(newOrder.ToArray());// получает все заказы
             ReceiptDay = new DateTime(2020, 10, day); // Передается только день, все остальное остается.
-            orderCount++;
         }
         public Order(int orderNumber, List<ProductInOrder> newOrder) // Конструктор.
         {
             OrderNumber = orderNumber; // устанавливает номер
             ProductsInOrder.AddRange(newOrder.ToArray());// получает все заказы
             ReceiptDay = DateTime.Today; // день ставится сегодняшний.
-            orderCount++;
         }
         public Order(int orderNumber, DateTime time, List<ProductInOrder> newOrder) // Конструктор.
         {
             OrderNumber = orderNumber; // устанавливает номер
             ProductsInOrder.AddRange(newOrder.ToArray());// получает все заказы
             ReceiptDay = time; // день ставится сегодняшний.
-            orderCount++;
         }
         public Order() // Конструктор.
         {
