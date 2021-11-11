@@ -13,7 +13,7 @@ using VariantB.DelegateEventSort;
 using VariantB.DataBase;
 using System.Threading;
 
-
+// В Functions и CRUDOp
 namespace VariantC
 {
     class MainClass
