@@ -31,54 +31,61 @@ namespace VariantC
 
             ProductStorage productInOrderStorage = new ProductStorage(); // коллекция продуктов
             OrderStorage storageOrder = new OrderStorage(); // коллекция заказов
-            SerialiseCheck(storageOrder);
-            CRUDOp.CreateDataBaseFile("DataBase"); // Создание файла БД.
+            if (!SerialiseCheck(storageOrder))
+            {
+                CRUDOp.CreateDataBaseFile("DataBase"); // Создание файла БД.
 
-            productInOrderStorage.AddProduct(new ProductInOrder(TableProduct, 3)); // Продукты в коллекцию
-            productInOrderStorage.AddProduct(new ProductInOrder(AppleProduct, 55));
-            productInOrderStorage.AddProduct(new ProductInOrder(TShirtProduct, 5));
-            productInOrderStorage.AddProduct(new ProductInOrder(MouseProduct, 7));
-            productInOrderStorage.AddProduct(new ProductInOrder(TShirtProduct, 10));
-            productInOrderStorage.AddProduct(new ProductInOrder(TableProduct, 1));
-            productInOrderStorage.AddProduct(new ProductInOrder(AppleProduct, 20));
-            productInOrderStorage.AddProduct(new ProductInOrder(TShirtProduct, 2));//
+                productInOrderStorage.AddProduct(new ProductInOrder(TableProduct, 3)); // Продукты в коллекцию
+                productInOrderStorage.AddProduct(new ProductInOrder(AppleProduct, 55));
+                productInOrderStorage.AddProduct(new ProductInOrder(TShirtProduct, 5));
+                productInOrderStorage.AddProduct(new ProductInOrder(MouseProduct, 7));
+                productInOrderStorage.AddProduct(new ProductInOrder(TShirtProduct, 10));
+                productInOrderStorage.AddProduct(new ProductInOrder(TableProduct, 1));
+                productInOrderStorage.AddProduct(new ProductInOrder(AppleProduct, 20));
+                productInOrderStorage.AddProduct(new ProductInOrder(TShirtProduct, 2));//
 
-            storageOrder.AddOrder("0996154567", new Order(83444, 14, new List<ProductInOrder>() {
+                storageOrder.AddOrder("0996154567", new Order(83444, 14, new List<ProductInOrder>() {
             productInOrderStorage[0], productInOrderStorage[1]}));// создать добавить заказ // 1 ЗАКАЗ//
 
-            storageOrder.AddOrder("0994433565", new Order(80111, 15, new List<ProductInOrder>() {
+                storageOrder.AddOrder("0994433565", new Order(80111, 15, new List<ProductInOrder>() {
             productInOrderStorage[2]}));// добавить заказ // 2 ЗАКАЗ//
 
-            storageOrder.AddOrder("0568462346", new Order(90999, 16, new List<ProductInOrder>() {
+                storageOrder.AddOrder("0568462346", new Order(90999, 16, new List<ProductInOrder>() {
             productInOrderStorage[3], productInOrderStorage[4], productInOrderStorage[5]}));// добавить заказ // 3 ЗАКАЗ//
 
-            storageOrder.AddOrder("0564750381", new Order(10000, 15, new List<ProductInOrder>() {
+                storageOrder.AddOrder("0564750381", new Order(10000, 15, new List<ProductInOrder>() {
             productInOrderStorage[6], productInOrderStorage[7]}));// добавить заказ // 4 ЗАКАЗ//
 
-            SetOrder(ref productInOrderStorage, ref storageOrder); // Меню добавления заказов. Метод в этом классе ниже.
-            CRUDOperations(storageOrder); // CRUD Операции, в этом классе ниже
+                SetOrder(ref productInOrderStorage, ref storageOrder); // Меню добавления заказов. Метод в этом классе ниже.
+                CRUDOperations(storageOrder); // CRUD Операции, в этом классе ниже
 
-            storageOrder.Serialize(); // Сериализация коллекции.
+                storageOrder.Serialize(); // Сериализация коллекции.
 
-            Thread myThread;
-            myThread = new Thread(delegate () { Functions.SearchOrdersWithSumAndCOuntOfProducts(storageOrder, 10000, 2); });//Вывести номера заказов, сумма которых не превосходит заданную и количество различных товаров равно заданному. 
-            myThread.Start();
-            myThread = new Thread(delegate () { Functions.SearchThisProduction(storageOrder, "TShirt"); });// Вывести номера заказов, содержащих заданный товар.
-            myThread.Start(); 
-            myThread = new Thread(delegate () { Functions.SearchNotContainsProductAndToday(storageOrder, "Apple", 15); });//Вывести номера заказов, не содержащих заданный товар и поступивших в течение текущего дня.
-            myThread.Start(); 
-            myThread = new Thread(delegate () { Functions.CreateOrder(ref storageOrder, 15); });
-            myThread.Start(); 
+                Thread myThread;
+                myThread = new Thread(delegate () { Functions.SearchOrdersWithSumAndCOuntOfProducts(storageOrder, 10000, 2); });//Вывести номера заказов, сумма которых не превосходит заданную и количество различных товаров равно заданному. 
+                myThread.Start();
+                myThread = new Thread(delegate () { Functions.SearchThisProduction(storageOrder, "TShirt"); });// Вывести номера заказов, содержащих заданный товар.
+                myThread.Start();
+                myThread = new Thread(delegate () { Functions.SearchNotContainsProductAndToday(storageOrder, "Apple", 15); });//Вывести номера заказов, не содержащих заданный товар и поступивших в течение текущего дня.
+                myThread.Start();
+                myThread = new Thread(delegate () { Functions.CreateOrder(ref storageOrder, 15); });
+                myThread.Start();
 
-            Console.WriteLine("---------------------------------------------");
-            foreach (var item in storageOrder)
-                Console.WriteLine(item);
-            myThread = new Thread(delegate () { Functions.RemoveOrdersThisProductThisAmount(ref storageOrder, "TShirt", 2); }); //Удалить все заказы, в которых присутствует заданное количество заданного товара.
-            myThread.Start(); 
-            Thread.Sleep(2000);
-            Console.WriteLine("---------------------------------------------");
-            foreach (var item in storageOrder)
-                Console.WriteLine(item);
+                Console.WriteLine("---------------------------------------------");
+                foreach (var item in storageOrder)
+                    Console.WriteLine(item);
+                myThread = new Thread(delegate () { Functions.RemoveOrdersThisProductThisAmount(ref storageOrder, "TShirt", 2); }); //Удалить все заказы, в которых присутствует заданное количество заданного товара.
+                myThread.Start();
+                Thread.Sleep(2000);
+                Console.WriteLine("---------------------------------------------");
+                foreach (var item in storageOrder)
+                    Console.WriteLine(item);
+            }
+            else
+            {
+                foreach (var item in storageOrder)
+                    Console.WriteLine(item);
+            }
             Console.ReadKey();
         }
 
@@ -138,21 +145,22 @@ namespace VariantC
             }
         }
 
-        public static void SerialiseCheck(OrderStorage storageOrder)
+        public static bool SerialiseCheck(OrderStorage storageOrder)
         {
             Console.WriteLine("Програма завершилась с ошибкой? 1. Да 2. Нет");
             int checkSerialize = Int32.Parse(Console.ReadLine());
-            switch (checkSerialize)
+            if (checkSerialize == 1)
             {
-                case 1:
-                    IsDeserialize(true, storageOrder);// Нужна ли десериализация.  Метод в этом классе ниже.
-                    break;
-                case 2:
-                    IsDeserialize(false, storageOrder);// Нужна ли десериализация.  Метод в этом классе ниже.
-                    break;
-                default:
-                    break;
+                IsDeserialize(true, storageOrder);// Нужна ли десериализация.
+                return true;
             }
+            else if (checkSerialize == 2)
+            {
+                IsDeserialize(false, storageOrder);// Нужна ли десериализация.
+                return false;
+            }
+            else
+                return false;
         }
         public static void CRUDOperations(OrderStorage storageOrder) // 
         {
